@@ -11,50 +11,19 @@ import {
 
 import HomeScreen from './HomePage';
 import OtherScreen from './OtherScreen';
+import {withFancyDrawer} from './withFancyHeader';
 
-const THEME_COLOR = '#0069fe';
-const {width} = Dimensions.get('screen');
-const AnimatedContext = React.createContext(void 0);
+export const THEME_COLOR = '#0069fe';
 
-function withFancyDrawer(Component) {
-  return props => (
-    <Wrapper>
-      <Component {...props} />
-    </Wrapper>
-  );
-}
-function Wrapper({children, ...props}) {
-  const animated = useContext(AnimatedContext);
-  const scale = interpolate(animated, {
-    inputRange: [0, 1],
-    outputRange: [1, 0.8],
-  });
-  const translateX = interpolate(animated, {
-    inputRange: [0, 1],
-    outputRange: [0, (width / 5) * 4],
-  });
-
-  console.log(animated);
-  return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: THEME_COLOR,
-      }}>
-      <TransitionContainer style={{transform: [{scale, translateX}]}}>
-        <TransparentCard
-          style={{
-            transform: [{translateX: -50}, {scale: 0.9}],
-          }}
-        />
-        <Card>{children}</Card>
-      </TransitionContainer>
-    </View>
-  );
-}
+// We are gonna use react Context to passe the progress animated Value
+// from react-navigation drawer to the Wrapper
+export const AnimatedContext = React.createContext(void 0);
 
 const Drawer = createDrawerNavigator();
 
+/**
+ * The drawer itself
+ */
 function CustomDrawerContent(props) {
   return (
     <DrawerContentScrollView {...props}>
@@ -76,16 +45,16 @@ export default function App() {
   const [animatedValue, setAnimatedValue] = useState(new Animated.Value(0));
   return (
     <AnimatedContext.Provider value={animatedValue}>
-      <View style={{backgroundColor: 'red', flex: 1}}>
+      <View style={{backgroundColor: THEME_COLOR, flex: 1}}>
         <NavigationContainer>
           <Drawer.Navigator
             drawerStyle={{
               backgroundColor: 'transparent',
             }}
+            drawerType={'slide'}
             initialRouteName="Home"
             overlayColor="transparent"
             drawerContent={props => {
-              console.log(props);
               setAnimatedValue(props.progress);
               return <CustomDrawerContent {...props} />;
             }}>
@@ -103,7 +72,6 @@ export default function App() {
     </AnimatedContext.Provider>
   );
 }
-// <Drawer.Screen name="Notifications" component={NotificationsScreen} />
 
 const FakeDrawerHeader = styled.View`
   width: 100%;
@@ -115,28 +83,4 @@ const AppTitle = styled.Text`
   font-size: 22px;
   color: white;
   font-weight: bold;
-`;
-
-const TransitionContainer = styled(Animated.View)`
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-`;
-// background-color: white;
-const TransparentCard = styled.View`
-  width: 100%;
-  height: 100%;
-  background-color: white;
-  opacity: 0.3;
-  border-radius: 30px;
-`;
-const Card = styled.View`
-  width: 100%;
-  height: 100%;
-  border-radius: 30px;
-  background-color: white;
-  position: absolute;
-  top: 0;
-  left: 0;
-  overflow: hidden;
 `;
